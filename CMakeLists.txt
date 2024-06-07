@@ -1,17 +1,18 @@
 cmake_minimum_required(VERSION 3.0)
 project(totpfltk)
 
-# Find ncurses
-
 # Find OpenSSL
 find_package(OpenSSL REQUIRED)
+
+#Find FLTK
+find_package(FLTK REQUIRED)
 
 # Add your source files
 set(SOURCES
     src/InputWindow.cpp
     src/Timer.cpp
-    src/TOTP.cpp
     src/TotpTable.cpp
+    src/TOTP.cpp
     main.cpp
     # Add more source files here if needed
 )
@@ -27,5 +28,5 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 add_executable(totpfltk ${SOURCES})
 
 # Link ncurses
-target_link_libraries(totpcmd OpenSSL::SSL OpenSSL::Crypto)
+target_link_libraries(totpfltk OpenSSL::SSL OpenSSL::Crypto)
 
