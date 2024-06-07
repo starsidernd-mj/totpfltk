@@ -4,6 +4,7 @@
 #include <iostream>
 #include <iomanip>
 #include <cstring>
+#include <sstream>
 #include <ctime>
 #include <cmath>
 #include <openssl/hmac.h>

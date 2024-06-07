@@ -7,6 +7,9 @@ find_package(OpenSSL REQUIRED)
 #Find FLTK
 find_package(FLTK REQUIRED)
 
+# Find X11 (required for FLTK on Linux)
+find_package(X11 REQUIRED)
+
 # Add your source files
 set(SOURCES
     src/InputWindow.cpp
@@ -28,5 +31,5 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 add_executable(totpfltk ${SOURCES})
 
 # Link ncurses
-target_link_libraries(totpfltk OpenSSL::SSL OpenSSL::Crypto)
+target_link_libraries(totpfltk fltk ${X11_LIBRARIES} OpenSSL::SSL OpenSSL::Crypto)
 
