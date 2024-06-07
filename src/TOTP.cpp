@@ -1,7 +1,7 @@
 #include "TOTP.h"
 
 std::string TOTP::generateTOTP(const std::string& key, uint64_t counter, size_t digits) {
-    std::cout << key << " " << counter << " " << digits << std::endl;
+    //std::cout << key << " " << counter << " " << digits << std::endl;
     // Prepare data for HMAC
     std::string data(reinterpret_cast<char*>(&counter), sizeof(counter));
 
