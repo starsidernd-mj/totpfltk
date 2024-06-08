@@ -42,6 +42,22 @@ set(TOTPFLTK_ETC_DIR /etc/totpfltk)
 # Install the binary
 install(TARGETS totpfltk RUNTIME DESTINATION bin)
 
+# Define installation paths
+set(ICON_DESTINATION share/icons/hicolor/256x256/apps)
+set(DESKTOP_DESTINATION share/applications)
+
+# Install the icon
+install(FILES icon_256x256.png DESTINATION ${ICON_DESTINATION} RENAME totpfltk.png)
+
+# Install the desktop entry
+install(FILES totpfltk.desktop DESTINATION ${DESKTOP_DESTINATION})
+
+# Install pkexec policy
+install(FILES org.pkexec.totpfltk.policy DESTINATION /usr/share/polkit-1/actions/)
+
+# Install pkexec script to run totpfltk as sudo
+install(PROGRAMS totpfltk-pkexec DESTINATION /usr/local/bin)
+
 # Create /etc/totpfltk and create keys
 install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${TOTPFLTK_ETC_DIR})")
 install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E touch ${TOTPFLTK_ETC_DIR}/keys)")

@@ -6,16 +6,20 @@
 #include <FL/Fl_Dial.H>
 #include <FL/Fl_Multiline_Output.H>
 #include <FL/fl_message.H>
+#include <FL/Fl_Menu_Button.H>
+
+
 #include <TotpTable.h>
 #include <InputWindow.h>
 #include <Timer.h>
+#include <Entry.h>
+#include <FileHandler.h>
+
 #include <unistd.h>
 #include <fstream>
 #include <sstream>
 #include <string>
 #include <cstdlib>
-#include <Entry.h>
-#include <FileHandler.h>
 
 Fl_Window *window;
 TotpTable *table;
@@ -64,7 +68,6 @@ void countdown_cb(void* data) {
     int value = (int)dial->value();
     if (value > 0) {
         dial->value(value - 1);
-        //Timer::get_countdown();
     } else {
         dial->value(Timer::get_countdown()); // Reset to 30 seconds when it reaches 0
         for(int i = 0; i < table->get_size(); i++) {
@@ -93,15 +96,25 @@ void on_top_toggle_callback(Fl_Widget* widget, void* data) {
     set_window_always_on_top(window, on_top);
 }
 
+void relaunch_with_sudo(int argc, char* argv[]) {
+    std::vector<const char*> args;
+    args.push_back("sudo");
+    for (int i = 0; i < argc; ++i) {
+        args.push_back(argv[i]);
+    }
+    args.push_back(nullptr);
+
+    execvp("sudo", const_cast<char* const*>(args.data()));
+    perror("execvp");
+    exit(EXIT_FAILURE);
+}
+
 int main(int argc, char **argv) {
     // Check user permissions
     if(geteuid() != 0) {
         fl_message_title("Permission Denied");
-        fl_message("This application must be run as root (sudo).\n"
-                   "Please restart the application with superuser privileges.");
-
-        // Exit the application
-        exit(EXIT_FAILURE);
+        fl_message("This application must be run as root (sudo).");
+        relaunch_with_sudo(argc, argv);
     }
 
     window = new Fl_Window(400, 620, "TOTP FLTK");
@@ -150,7 +163,6 @@ int main(int argc, char **argv) {
         fileContents = FileHandler::readFile(saveFilePath);
 
         for (Entry_d row : fileContents) {
-            //std::cout << row.issuer << " " << row.secret << " " << row.digits << " " << row.timestep << std::endl;
             uint64_t time_step = std::stoi(row.timestep);
             size_t digits = std::stoi(row.digits);
             std::string tmp = totpGen->generateTOTP(row.secret, Timer::get_time(time_step), digits);
@@ -162,7 +174,6 @@ int main(int argc, char **argv) {
     } catch (const std::exception& e) {
         fl_message_title("Error");
         fl_message(e.what());
-        //exit(EXIT_FAILURE);
     }
 
     window->end();

@@ -6,11 +6,16 @@ TotpTable::~TotpTable()
     //dtor
 }
 
-TotpTable::TotpTable(int X, int Y, int W, int H, const char* L) : Fl_Table_Row(X, Y, W, H, L), hidden_column_data({}) {
+TotpTable::TotpTable(int X, int Y, int W, int H, const char* L) : Fl_Table_Row(X, Y, W, H, L), menu_button(new Fl_Menu_Button(0, 0, 0, 0)), hidden_column_data({}) {
+    menu_button->type(Fl_Menu_Button::POPUP3);
+    menu_button->add("Modify", 0, menu_callback, (void*)"Modify");
+    menu_button->add("Delete", 0, menu_callback, (void*)"Delete");
+
     end(); // Close the group
     rows(0); // Initialize with 0 rows
     cols(2); // 2 columns
 }
+
 void TotpTable::add_row(const std::vector<std::string>& row_data) {
     table_data.push_back(row_data);
     rows(table_data.size()); // Update the number of rows
@@ -46,7 +51,6 @@ void TotpTable::update_row(int row_index, bool visible) {
         } else {
             visible_column_data[row_index][1] = "******";
         }
-        //redraw_row(row_index); // Redraw the updated row
         redraw();
     }
 }
@@ -67,4 +71,8 @@ void TotpTable::show_rows() {
 
 std::vector<std::vector<std::string>> TotpTable::get_table_data() {
     return table_data;
+}
+
+void TotpTable::menu_callback(Fl_Widget* w, void* data) {
+    std::cout << "Menu option selected: " << static_cast<const char*>(data) << std::endl;
 }

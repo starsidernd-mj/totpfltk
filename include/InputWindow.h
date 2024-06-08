@@ -15,10 +15,9 @@
 class InputWindow : public Fl_Window
 {
     public:
-        //InputWindow();
+        InputWindow(int W, int H, const char* L=0, bool visible=true);
         virtual ~InputWindow();
 
-        InputWindow(int W, int H, const char* L=0, bool visible=true);
         static void add_callback(Fl_Widget* widget, void* data);
         void set_table(TotpTable* t);
 

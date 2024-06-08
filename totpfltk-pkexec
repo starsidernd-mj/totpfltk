@@ -1,0 +1,4 @@
+#!/bin/bash
+
+pkexec /usr/local/bin/totpfltk
+

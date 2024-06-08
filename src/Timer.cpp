@@ -6,9 +6,6 @@ uint64_t Timer::get_time(uint64_t timeStep) {
     std::time_t currentTime = std::chrono::system_clock::to_time_t(now);
     uint64_t currentTime64 = static_cast<uint64_t>(currentTime);
 
-    // time step
-    //uint64_t timeStep = 30;
-
     // calculate counter based on current time and time step
     uint64_t counter = currentTime64 / timeStep;
     return counter;
@@ -25,6 +22,5 @@ uint64_t Timer::get_countdown() {
 
     // calculate counter based on current time and time step
     uint64_t counter = 29 - (currentTime64 % timeStep);
-    //std::cout << " " << currentTime64 << " " << timeStep << " " << counter << std::endl;
     return counter;
 }

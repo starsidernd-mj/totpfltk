@@ -19,10 +19,7 @@ class TOTP
 {
     public:
         static std::string generateTOTP(const std::string& key, uint64_t counter, size_t digits = 6);
-
-        static std::string base32_encode(const std::string& input);
         static std::string base32_decode(const std::string& input);
-        static size_t decode_b32key(uint8_t **k, size_t len);
 
     protected:
 
