@@ -19,8 +19,6 @@ std::string TOTP::generateTOTP(const std::string& key, uint64_t counter, size_t 
     // Compute HMAC-SHA1
     unsigned char hash[EVP_MAX_MD_SIZE];
     unsigned int hash_len;
-    //working//digest = (uint8_t *)HMAC(EVP_sha1(), k, keylen, (const unsigned char *)&counter, sizeof(counter), hash, &hash_len);
-    //digest = (uint8_t *)HMAC(EVP_sha1(), base32_key.c_str(), base32_key.length(), (const unsigned char *)&counter, sizeof(counter), hash, &hash_len);
     HMAC(EVP_sha1(), base32_key.c_str(), base32_key.length(), (const unsigned char *)&counter, sizeof(counter), hash, &hash_len);
 
     // Get last nibble of the digest to determine the starting offset
