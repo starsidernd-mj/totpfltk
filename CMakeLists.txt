@@ -12,6 +12,8 @@ find_package(X11 REQUIRED)
 
 # Add your source files
 set(SOURCES
+    src/Entry.cpp
+    src/FileHandler.cpp
     src/InputWindow.cpp
     src/Timer.cpp
     src/TotpTable.cpp

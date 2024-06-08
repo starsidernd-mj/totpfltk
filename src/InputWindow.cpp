@@ -24,6 +24,10 @@ InputWindow::InputWindow(int W, int H, const char* L, bool visible) : Fl_Window(
 
 void InputWindow::add_callback(Fl_Widget* widget, void* data) {
     InputWindow* win = (InputWindow*)data;
+    win->entry = {win->col1_input->value(), win->col2_input->value(), std::to_string((int)(win->col3_input->value())), std::to_string((int)(win->col4_input->value()))};
+
+    // call filehandler and save to file
+    FileHandler::write_file(win->entry, "/etc/totpfltk/keys");
 
     //generate new TOTP data here to add to table
     uint64_t time_step = (int)(win->col4_input->value());

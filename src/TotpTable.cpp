@@ -64,3 +64,7 @@ void TotpTable::show_rows() {
         redraw();
     }
 }
+
+std::vector<std::vector<std::string>> TotpTable::get_table_data() {
+    return table_data;
+}

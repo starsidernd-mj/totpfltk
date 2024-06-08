@@ -4,9 +4,18 @@
 #include <FL/Fl_Check_Button.H>
 #include <FL/fl_draw.H>
 #include <FL/Fl_Dial.H>
+#include <FL/Fl_Multiline_Output.H>
+#include <FL/fl_message.H>
 #include <TotpTable.h>
 #include <InputWindow.h>
 #include <Timer.h>
+#include <unistd.h>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <cstdlib>
+#include <Entry.h>
+#include <FileHandler.h>
 
 Fl_Window *window;
 TotpTable *table;
@@ -15,8 +24,13 @@ Fl_Button *addButton;
 Fl_Button *hideButton;
 Fl_Button *exitButton;
 Fl_Check_Button *topBox;
+static TOTP* totpGen;
 
 bool visible = true;
+std::string saveFilePath = "/etc/totpfltk/keys";
+// csv file format
+// issuer,secret,digits,timestep
+
 
 void show_input_window(Fl_Widget* widget, void* data) {
     TotpTable* table = (TotpTable*)data;
@@ -81,15 +95,19 @@ void on_top_toggle_callback(Fl_Widget* widget, void* data) {
 
 int main(int argc, char **argv) {
     // Check user permissions
-    /*if(geteuid() != 0) {
-        std::cerr << "This program must be run with root permissions." << std::endl;
-        return 1;
-    }*/
+    if(geteuid() != 0) {
+        fl_message_title("Permission Denied");
+        fl_message("This application must be run as root (sudo).\n"
+                   "Please restart the application with superuser privileges.");
+
+        // Exit the application
+        exit(EXIT_FAILURE);
+    }
 
     window = new Fl_Window(400, 620, "TOTP FLTK");
 
     table = new TotpTable(20, 20, 360, 500);
-    table->rows(0);          // 10 rows
+    table->rows(0);           // 0 rows
     table->cols(2);           // 2 columns
     table->col_header(1);     // Enable column headers
     table->row_header(0);     // Enable row headers
@@ -125,6 +143,27 @@ int main(int argc, char **argv) {
     topBox->value(0);
     topBox->callback(on_top_toggle_callback, (void*)window);
     topBox->hide();
+
+    // Attempt to read the file
+    std::vector<Entry_d> fileContents;
+    try {
+        fileContents = FileHandler::readFile(saveFilePath);
+
+        for (Entry_d row : fileContents) {
+            //std::cout << row.issuer << " " << row.secret << " " << row.digits << " " << row.timestep << std::endl;
+            uint64_t time_step = std::stoi(row.timestep);
+            size_t digits = std::stoi(row.digits);
+            std::string tmp = totpGen->generateTOTP(row.secret, Timer::get_time(time_step), digits);
+
+            std::vector<std::string> new_row = { row.issuer, visible ? tmp : "******" };
+            std::vector<std::string> secret_key = { tmp, row.secret, row.digits, row.timestep };
+            table->add_row(new_row, secret_key);
+        }
+    } catch (const std::exception& e) {
+        fl_message_title("Error");
+        fl_message(e.what());
+        //exit(EXIT_FAILURE);
+    }
 
     window->end();
     window->show(argc, argv);

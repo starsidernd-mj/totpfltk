@@ -24,6 +24,7 @@ class TotpTable : public Fl_Table_Row
         void update_row(int row_index, bool visible);
         void hide_rows();
         void show_rows();
+        std::vector<std::vector<std::string>> get_table_data();
 
     protected:
         void draw_cell(TableContext context, int R, int C, int X, int Y, int W, int H) override {

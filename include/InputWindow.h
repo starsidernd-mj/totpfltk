@@ -9,6 +9,8 @@
 #include <cstdint>
 #include <TOTP.h>
 #include <Timer.h>
+#include <Entry.h>
+#include <FileHandler.h>
 
 class InputWindow : public Fl_Window
 {
@@ -19,6 +21,8 @@ class InputWindow : public Fl_Window
         InputWindow(int W, int H, const char* L=0, bool visible=true);
         static void add_callback(Fl_Widget* widget, void* data);
         void set_table(TotpTable* t);
+
+        Entry_d entry;
 
     protected:
 
