@@ -21,6 +21,6 @@ uint64_t Timer::get_countdown() {
     uint64_t timeStep = 30;
 
     // calculate counter based on current time and time step
-    uint64_t counter = 29 - (currentTime64 % timeStep);
+    uint64_t counter = 30 - (currentTime64 % timeStep);
     return counter;
 }

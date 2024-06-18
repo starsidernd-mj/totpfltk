@@ -67,13 +67,21 @@ void countdown_cb(void* data) {
     Fl_Dial* dial = (Fl_Dial*)data;
     int value = (int)dial->value();
     if (value > 0) {
+        //change dial to red if < 10 seconds left
+        if(value <= 10) {
+            dial->color2(FL_RED);
+        } else {
+            dial->color2(FL_DARK3);
+        }
         dial->value(value - 1);
     } else {
+        dial->color2(FL_DARK3);
         dial->value(Timer::get_countdown()); // Reset to 30 seconds when it reaches 0
         for(int i = 0; i < table->get_size(); i++) {
             table->update_row(i, visible);
         }
     }
+    //std::cout << "Value: " << value << std::endl;
     Fl::repeat_timeout(1.0, countdown_cb, data);
 }
 
@@ -132,7 +140,7 @@ int main(int argc, char **argv) {
     dial->angle1(0);
     dial->angle2(360);
     dial->minimum(0);
-    dial->maximum(30);
+    dial->maximum(29);
     dial->value(Timer::get_countdown());
     Fl::add_timeout(1.0, countdown_cb, dial);
 
