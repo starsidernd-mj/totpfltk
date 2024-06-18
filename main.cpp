@@ -65,15 +65,15 @@ void exit_callback(Fl_Widget* widget, void* data) {
 // Countdown callback function
 void countdown_cb(void* data) {
     Fl_Dial* dial = (Fl_Dial*)data;
-    int value = (int)dial->value();
+    int value = (int)Timer::get_countdown();
     if (value > 0) {
-        //change dial to red if < 10 seconds left
+        //change dial to red if <= 10 seconds left
         if(value <= 10) {
             dial->color2(FL_RED);
         } else {
             dial->color2(FL_DARK3);
         }
-        dial->value(value - 1);
+        dial->value(value);
     } else {
         dial->color2(FL_DARK3);
         dial->value(Timer::get_countdown()); // Reset to 30 seconds when it reaches 0
@@ -82,7 +82,7 @@ void countdown_cb(void* data) {
         }
     }
     //std::cout << "Value: " << value << std::endl;
-    Fl::repeat_timeout(1.0, countdown_cb, data);
+    Fl::repeat_timeout(0.5, countdown_cb, data);
 }
 
 void set_window_always_on_top(Fl_Window* window, bool on_top) {
@@ -140,9 +140,9 @@ int main(int argc, char **argv) {
     dial->angle1(0);
     dial->angle2(360);
     dial->minimum(0);
-    dial->maximum(29);
+    dial->maximum(30);
     dial->value(Timer::get_countdown());
-    Fl::add_timeout(1.0, countdown_cb, dial);
+    Fl::add_timeout(0.5, countdown_cb, dial);
 
     // add button to add entry
     addButton = new Fl_Button(100, 545, 80, 30, "Add");

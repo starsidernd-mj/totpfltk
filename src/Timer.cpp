@@ -21,6 +21,8 @@ uint64_t Timer::get_countdown() {
     uint64_t timeStep = 30;
 
     // calculate counter based on current time and time step
-    uint64_t counter = 30 - (currentTime64 % timeStep);
+    uint64_t pre_cnt = (currentTime64 % timeStep);
+    uint64_t counter = 30 - pre_cnt;
+    //std::cout << "Precount: " << pre_cnt << ", Counter: " << counter << std::endl;
     return counter;
 }
