@@ -18,6 +18,7 @@ set(SOURCES
     src/Timer.cpp
     src/TotpTable.cpp
     src/TOTP.cpp
+    src/DeleteWindow.cpp
     main.cpp
     # Add more source files here if needed
 )

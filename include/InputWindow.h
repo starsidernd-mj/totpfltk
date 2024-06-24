@@ -19,6 +19,7 @@ class InputWindow : public Fl_Window
         virtual ~InputWindow();
 
         static void add_callback(Fl_Widget* widget, void* data);
+        static void modify_callback(Fl_Widget* widget, void* data);
         void set_table(TotpTable* t);
 
         Entry_d entry;

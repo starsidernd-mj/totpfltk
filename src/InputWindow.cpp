@@ -24,7 +24,7 @@ InputWindow::InputWindow(int W, int H, const char* L, bool visible) : Fl_Window(
 
 void InputWindow::add_callback(Fl_Widget* widget, void* data) {
     InputWindow* win = (InputWindow*)data;
-    win->entry = {win->col1_input->value(), win->col2_input->value(), std::to_string((int)(win->col3_input->value())), std::to_string((int)(win->col4_input->value()))};
+    win->entry = { win->col1_input->value(), win->col2_input->value(), std::to_string((int)(win->col3_input->value())), std::to_string((int)(win->col4_input->value())) };
 
     // call filehandler and save to file
     FileHandler::write_file(win->entry, "/etc/totpfltk/keys");
@@ -39,6 +39,10 @@ void InputWindow::add_callback(Fl_Widget* widget, void* data) {
     TotpTable* table = (TotpTable*)win->table;
     table->add_row(new_row, secret_key);
     win->hide();
+}
+
+void InputWindow::modify_callback(Fl_Widget* widget, void* data) {
+
 }
 
 void InputWindow::set_table(TotpTable* t) {

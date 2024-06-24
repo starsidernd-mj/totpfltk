@@ -14,6 +14,7 @@
 #include <Timer.h>
 #include <Entry.h>
 #include <FileHandler.h>
+#include <DeleteWindow.h>
 
 #include <unistd.h>
 #include <fstream>
@@ -35,6 +36,14 @@ std::string saveFilePath = "/etc/totpfltk/keys";
 // csv file format
 // issuer,secret,digits,timestep
 
+void show_delete_window_callback(Fl_Widget* widget, void* data) {
+    std::cout << "Menu option selected: " << "Delete" << std::endl;
+    TotpTable* table = (TotpTable*)data;
+    DeleteWindow* delete_win = new DeleteWindow(230, 100, "Delete Entry", table->get_selected_row(), table);
+    delete_win->set_table(table);
+    //delete_win->set_selected_row(table->get_selected_row());
+    delete_win->show();
+}
 
 void show_input_window(Fl_Widget* widget, void* data) {
     TotpTable* table = (TotpTable*)data;
@@ -119,11 +128,11 @@ void relaunch_with_sudo(int argc, char* argv[]) {
 
 int main(int argc, char **argv) {
     // Check user permissions
-    if(geteuid() != 0) {
+    /*if(geteuid() != 0) {
         fl_message_title("Permission Denied");
         fl_message("This application must be run as root (sudo).");
         relaunch_with_sudo(argc, argv);
-    }
+    }*/
 
     window = new Fl_Window(400, 620, "TOTP FLTK");
 
@@ -133,6 +142,7 @@ int main(int argc, char **argv) {
     table->col_header(1);     // Enable column headers
     table->row_header(0);     // Enable row headers
     table->col_width_all(179);// Set column width to 100
+    table->get_menu_button()->add("Delete", 0, show_delete_window_callback, table);
     table->end();
 
     dial = new Fl_Dial(30, 540, 40, 40, "");
