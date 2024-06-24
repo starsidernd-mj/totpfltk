@@ -15,6 +15,7 @@
 #include <Entry.h>
 #include <FileHandler.h>
 #include <DeleteWindow.h>
+#include <ModifyWindow.h>
 
 #include <unistd.h>
 #include <fstream>
@@ -37,12 +38,20 @@ std::string saveFilePath = "/etc/totpfltk/keys";
 // issuer,secret,digits,timestep
 
 void show_delete_window_callback(Fl_Widget* widget, void* data) {
-    std::cout << "Menu option selected: " << "Delete" << std::endl;
+    //std::cout << "Menu option selected: " << "Delete" << std::endl;
     TotpTable* table = (TotpTable*)data;
     DeleteWindow* delete_win = new DeleteWindow(230, 100, "Delete Entry", table->get_selected_row(), table);
     delete_win->set_table(table);
-    //delete_win->set_selected_row(table->get_selected_row());
     delete_win->show();
+}
+
+void show_modify_window_callback(Fl_Widget* widget, void* data) {
+    //std::cout << "Menu option selected: " << "Modify" << std::endl;
+    TotpTable* table = (TotpTable*)data;
+    ModifyWindow* modify_win = new ModifyWindow(400, 250, "Modify Entry", table->get_selected_row(), visible);
+    modify_win->set_table(table);
+    modify_win->populate_window();
+    modify_win->show();
 }
 
 void show_input_window(Fl_Widget* widget, void* data) {
@@ -75,22 +84,21 @@ void exit_callback(Fl_Widget* widget, void* data) {
 void countdown_cb(void* data) {
     Fl_Dial* dial = (Fl_Dial*)data;
     int value = (int)Timer::get_countdown();
+    dial->value(value);
+    //std::cout << "Timer-- [" << value << "]" << std::endl;
     if (value > 0) {
+        if(value == 30) {
+            for(int i = 0; i < table->get_size(); i++) {
+                table->update_row(i, visible);
+            }
+        }
         //change dial to red if <= 10 seconds left
         if(value <= 10) {
             dial->color2(FL_RED);
         } else {
             dial->color2(FL_DARK3);
         }
-        dial->value(value);
-    } else {
-        dial->color2(FL_DARK3);
-        dial->value(Timer::get_countdown()); // Reset to 30 seconds when it reaches 0
-        for(int i = 0; i < table->get_size(); i++) {
-            table->update_row(i, visible);
-        }
     }
-    //std::cout << "Value: " << value << std::endl;
     Fl::repeat_timeout(0.5, countdown_cb, data);
 }
 
@@ -142,6 +150,7 @@ int main(int argc, char **argv) {
     table->col_header(1);     // Enable column headers
     table->row_header(0);     // Enable row headers
     table->col_width_all(179);// Set column width to 100
+    table->get_menu_button()->add("Modify", 0, show_modify_window_callback, table);
     table->get_menu_button()->add("Delete", 0, show_delete_window_callback, table);
     table->end();
 

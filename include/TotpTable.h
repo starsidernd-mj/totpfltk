@@ -7,6 +7,7 @@
 #include <FL/Fl_Menu_Button.H>
 #include <FL/fl_draw.H>
 #include <FL/Fl_Box.H>
+#include <FL/fl_ask.H>
 #include <vector>
 #include <string>
 #include <TOTP.h>
@@ -22,6 +23,7 @@ class TotpTable : public Fl_Table_Row
         void add_row(const std::vector<std::string>& row_data);
         void add_row(const std::vector<std::string>& visible_data, const std::vector<std::string>& hidden_data);
         void remove_row(int row);
+        void modify_row(int row, const std::vector<std::string>& visible_data, const std::vector<std::string>& hidden_data);
 
         std::string get_hidden_data(int row_index);
         int get_size();
@@ -32,13 +34,6 @@ class TotpTable : public Fl_Table_Row
         std::vector<std::vector<std::string>> get_table_data();
         std::vector<std::vector<std::string>> get_visible_column_data();
         std::vector<std::vector<std::string>> get_hidden_column_data();
-
-        static void menu_callback(Fl_Widget* w, void* data);
-        static void show_modify_window_callback(Fl_Widget* widget, void* data);
-        static void show_delete_window_callback(Fl_Widget* widget, void* data);
-
-        static void confirm_delete_callback(Fl_Widget* widget, void* data);
-        static void cancel_delete_callback(Fl_Widget* widget, void* data);
 
         int get_selected_row();
 

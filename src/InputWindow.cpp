@@ -19,12 +19,19 @@ InputWindow::InputWindow(int W, int H, const char* L, bool visible) : Fl_Window(
     col4_input->value(30);
     add_button = new Fl_Button(120, 200, 100, 30, "Add");
     add_button->callback(add_callback, this);
+    cancel_button = new Fl_Button(240, 200, 100, 30, "Cancel");
+    cancel_button->callback(cancel_add_callback, this);
     end();
 }
 
 void InputWindow::add_callback(Fl_Widget* widget, void* data) {
     InputWindow* win = (InputWindow*)data;
-    win->entry = { win->col1_input->value(), win->col2_input->value(), std::to_string((int)(win->col3_input->value())), std::to_string((int)(win->col4_input->value())) };
+    win->entry = {
+        win->col1_input->value(),
+        win->col2_input->value(),
+        std::to_string((int)(win->col3_input->value())),
+        std::to_string((int)(win->col4_input->value()))
+    };
 
     // call filehandler and save to file
     FileHandler::write_file(win->entry, "/etc/totpfltk/keys");
@@ -41,8 +48,9 @@ void InputWindow::add_callback(Fl_Widget* widget, void* data) {
     win->hide();
 }
 
-void InputWindow::modify_callback(Fl_Widget* widget, void* data) {
-
+void InputWindow::cancel_add_callback(Fl_Widget* widget, void* data) {
+    Fl_Window* win = (Fl_Window*)data;
+    win->hide();
 }
 
 void InputWindow::set_table(TotpTable* t) {
