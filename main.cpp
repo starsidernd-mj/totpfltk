@@ -128,11 +128,11 @@ void relaunch_with_sudo(int argc, char* argv[]) {
 
 int main(int argc, char **argv) {
     // Check user permissions
-    /*if(geteuid() != 0) {
+    if(geteuid() != 0) {
         fl_message_title("Permission Denied");
         fl_message("This application must be run as root (sudo).");
         relaunch_with_sudo(argc, argv);
-    }*/
+    }
 
     window = new Fl_Window(400, 620, "TOTP FLTK");
 

@@ -49,6 +49,9 @@ void DeleteWindow::confirm_delete_callback(Fl_Widget* widget, void* data) {
     // do delete logic here
     tb->remove_row(idx);
 
+    // call filehandler and modify file
+    FileHandler::modify_file(idx, "/etc/totpfltk/keys");
+
     win->hide();
 }
 

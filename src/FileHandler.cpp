@@ -53,3 +53,41 @@ std::vector<Entry_d> FileHandler::readFile(const std::string& filepath) {
 
     return entryData;
 }
+
+void FileHandler::modify_file(int row, const std::string& filepath) {
+    // Open the file in read mode
+    std::ifstream ifile;
+    ifile.open(filepath);
+    if(!ifile.is_open()) {
+        throw std::runtime_error("Failed to open file for reading: " + filepath);
+    }
+
+    // Open temp file for writing to. Will rename this to filepath
+    std::ofstream tfile;
+    std::string tmpFilePath = filepath + "_tmp";
+    tfile.open(tmpFilePath, std::ios::app);
+    if(!tfile.is_open()) {
+        throw std::runtime_error("Failed to open tfile for writing: " + tmpFilePath);
+    }
+
+    std::string line;
+    int current_line = 0;
+
+    while(getline(ifile, line)) {
+        if(current_line != row) {
+            tfile << line << std::endl;
+        }
+        ++current_line;
+    }
+
+    ifile.close();
+    tfile.close();
+
+    if(remove(filepath.c_str()) != 0) {
+        throw std::runtime_error("Error deleting original file: " + filepath);
+    }
+
+    if(rename(tmpFilePath.c_str(), filepath.c_str()) != 0) {
+        throw std::runtime_error("Error renaming temp file: " + tmpFilePath);
+    }
+}

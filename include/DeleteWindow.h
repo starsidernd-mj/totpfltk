@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <TOTP.h>
 #include <Timer.h>
+#include <FileHandler.h>
 
 class DeleteWindow : public Fl_Window
 {
