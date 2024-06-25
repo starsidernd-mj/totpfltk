@@ -4,6 +4,20 @@ DeleteWindow::DeleteWindow(int W, int H, const char* L, int selected_row, TotpTa
     this->selected_row = selected_row;
     this->table = tb;
 
+    std::vector<std::vector<std::string>> visible_column_data = tb->get_visible_column_data();
+    std::string issuer = visible_column_data.at(selected_row)[0];
+    //std::cout << "Issuer: " << issuer.c_str() << std::endl;
+
+    char shortBuffer[100];
+    strncpy(shortBuffer, issuer.c_str(), 99);
+    shortBuffer[99] = '\0';  // Ensure null-termination
+
+    this->label(shortBuffer);
+
+    //item_label = new Fl_Box(10, 20, 200, 40);
+    //item_label->type(FL_NO_BOX);
+    //item_label->label(shortBuffer);
+
     ok_btn = new Fl_Button(10, 60, 100, 30, "OK");
     ok_btn->callback(confirm_delete_callback, this);
 
@@ -11,7 +25,6 @@ DeleteWindow::DeleteWindow(int W, int H, const char* L, int selected_row, TotpTa
     cancel_btn->callback(cancel_delete_callback, this);
 
     end();
-    //show();
 }
 
 DeleteWindow::~DeleteWindow()

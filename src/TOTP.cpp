@@ -3,6 +3,7 @@
 std::string TOTP::generateTOTP(const std::string& key, uint64_t counter, size_t digits) {
     // Prepare data for HMAC
     uint32_t endianness;
+    std::string key_proper = key;
 
     endianness = 0xdeadbeef;
     if ((*(const uint8_t *)&endianness) == 0xef) {
@@ -12,7 +13,8 @@ std::string TOTP::generateTOTP(const std::string& key, uint64_t counter, size_t 
     };
 
     // Decode the key to be base32 compliant
-    std::string base32_key = base32_decode(key.c_str());
+    std::transform(key_proper.begin(), key_proper.end(), key_proper.begin(), ::toupper);
+    std::string base32_key = base32_decode(key_proper.c_str());
 
     // Compute HMAC-SHA1
     unsigned char hash[EVP_MAX_MD_SIZE];

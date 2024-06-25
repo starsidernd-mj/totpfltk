@@ -11,6 +11,9 @@
 #include <openssl/sha.h>
 #include <bitset>
 #include <vector>
+#include <algorithm>
+#include <cctype>
+#include <string>
 
 #include <unordered_map>
 #include <stdexcept>
