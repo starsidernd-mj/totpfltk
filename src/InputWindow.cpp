@@ -3,6 +3,13 @@
 InputWindow::~InputWindow()
 {
     //dtor
+    free(col1_input);
+    free(col2_input);
+    free(col3_input);
+    free(col4_input);
+    free(add_button);
+    free(cancel_button);
+    free(table);
 }
 
 InputWindow::InputWindow(int W, int H, const char* L, bool visible) : Fl_Window(W, H, L) {

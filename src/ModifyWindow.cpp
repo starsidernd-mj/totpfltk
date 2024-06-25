@@ -23,6 +23,13 @@ ModifyWindow::ModifyWindow(int W, int H, const char* L, int selected_row, bool v
 ModifyWindow::~ModifyWindow()
 {
     //dtor
+    free(col1_input);
+    free(col2_input);
+    free(col3_input);
+    free(col4_input);
+    free(update_button);
+    free(cancel_button);
+    free(table);
 }
 
 void ModifyWindow::set_table(TotpTable* t) {

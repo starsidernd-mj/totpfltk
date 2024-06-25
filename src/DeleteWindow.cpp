@@ -30,6 +30,11 @@ DeleteWindow::DeleteWindow(int W, int H, const char* L, int selected_row, TotpTa
 DeleteWindow::~DeleteWindow()
 {
     //dtor
+    free(table);
+    free(ok_btn);
+    free(cancel_btn);
+    free(item_label);
+    free(win);
 }
 
 void DeleteWindow::set_table(TotpTable* t) {

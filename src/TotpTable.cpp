@@ -4,6 +4,7 @@
 TotpTable::~TotpTable()
 {
     //dtor
+    free(menu_button);
 }
 
 TotpTable::TotpTable(int X, int Y, int W, int H, const char* L)
