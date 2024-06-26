@@ -78,9 +78,9 @@ int TotpTable::handle(int event) {
                 //check for double click
                 if (row >= 0 && row < rows()) {
                     selected_row = row;
-                    //std::cout << "Double click, selrow: " << selected_row << std::endl;
-                    //fl_alert("Copied key to clipboard");
                     redraw();
+                    std::string selected_token = visible_column_data[selected_row][1];
+                    Fl::copy(selected_token.c_str(), selected_token.length(), 1); // 1 means plain text
                 }
             }
         } break;
@@ -89,15 +89,12 @@ int TotpTable::handle(int event) {
             if (Fl::event_button() == FL_LEFT_MOUSE) {
                 if(row >= 0 && row < rows()) {
                     selected_row = row;
-                    //std::cout << "L click, row col: " << row << ", " << col << std::endl;
                     redraw();
                 }
                 return 1;
             } else if (Fl::event_button() == FL_RIGHT_MOUSE) {
-                //std::cout << "R click, row col: " << row << ", " << col << std::endl;
                 if (row >= 0 && row < rows()) {
                     selected_row = row;
-                    //std::cout << "R click, selrow: " << selected_row << std::endl;
                     redraw();
                     menu_button->position(Fl::event_x(), Fl::event_y());
                     menu_button->popup();
