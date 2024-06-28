@@ -1,6 +1,8 @@
 #ifndef TOTP_H
 #define TOTP_H
 
+#include "Entry.h"
+
 #include <iostream>
 #include <iomanip>
 #include <cstring>

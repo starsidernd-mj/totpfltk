@@ -14,8 +14,8 @@ DeleteWindow::DeleteWindow(int W, int H, const char* L, int selected_row, TotpTa
 
     this->label(shortBuffer);
 
-    //item_label = new Fl_Box(10, 20, 200, 40);
-    //item_label->type(FL_NO_BOX);
+    item_label = new Fl_Box(10, 15, 200, 40, "Delete this entry?");
+    item_label->type(FL_NO_BOX);
     //item_label->label(shortBuffer);
 
     ok_btn = new Fl_Button(10, 60, 100, 30, "OK");

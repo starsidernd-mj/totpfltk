@@ -35,7 +35,7 @@ void InputWindow::add_callback(Fl_Widget* widget, void* data) {
     InputWindow* win = (InputWindow*)data;
     win->entry = {
         win->col1_input->value(),
-        win->col2_input->value(),
+        strip_invalid_characters(win->col2_input->value()),
         std::to_string((int)(win->col3_input->value())),
         std::to_string((int)(win->col4_input->value()))
     };
@@ -46,10 +46,10 @@ void InputWindow::add_callback(Fl_Widget* widget, void* data) {
     //generate new TOTP data here to add to table
     uint64_t time_step = (int)(win->col4_input->value());
     size_t digits = (int)(win->col3_input->value());
-    std::string tmp = totpGen->generateTOTP(win->col2_input->value(), Timer::get_time(time_step), digits);
+    std::string tmp = totpGen->generateTOTP(win->entry.secret, Timer::get_time(time_step), digits);
 
     std::vector<std::string> new_row = { win->col1_input->value(), win->visibility ? tmp : "******" };
-    std::vector<std::string> secret_key = { tmp, win->col2_input->value(), std::to_string(win->col3_input->value()), std::to_string(win->col4_input->value()) };
+    std::vector<std::string> secret_key = { tmp, win->entry.secret, std::to_string(win->col3_input->value()), std::to_string(win->col4_input->value()) };
     TotpTable* table = (TotpTable*)win->table;
     table->add_row(new_row, secret_key);
     win->hide();

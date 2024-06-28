@@ -57,26 +57,26 @@ void ModifyWindow::modify_callback(Fl_Widget* widget, void* data) {
     TotpTable* tb = (TotpTable*)win->table;
     int idx = win->get_selected_row();
 
+    win->entry = {
+        win->col1_input->value(),
+        strip_invalid_characters(win->col2_input->value()),
+        std::to_string((int)(win->col3_input->value())),
+        std::to_string((int)(win->col4_input->value()))
+    };
+
     //generate new TOTP data here to add to table
     uint64_t time_step = (int)(win->col4_input->value());
     size_t digits = (int)(win->col3_input->value());
-    std::string tmp = totpGen->generateTOTP(win->col2_input->value(), Timer::get_time(time_step), digits);
+    std::string tmp = totpGen->generateTOTP(win->entry.secret, Timer::get_time(time_step), digits);
 
 
     std::vector<std::string> vis_row = { win->col1_input->value(), win->visibility ? tmp : "******" };
-    std::vector<std::string> hid_row = { tmp, win->col2_input->value(), std::to_string(win->col3_input->value()), std::to_string(win->col4_input->value()) };
+    std::vector<std::string> hid_row = { tmp, win->entry.secret, std::to_string(win->col3_input->value()), std::to_string(win->col4_input->value()) };
 
     // do update logic here
     tb->modify_row(idx, vis_row, hid_row);
 
     // call filehandler and modify file
-    //FileHandler::update_file(idx, "/etc/totpfltk/keys");
-    win->entry = {
-        win->col1_input->value(),
-        win->col2_input->value(),
-        std::to_string((int)(win->col3_input->value())),
-        std::to_string((int)(win->col4_input->value()))
-    };
     FileHandler::update_file(win->entry, idx, "/etc/totpfltk/keys");
 
     win->hide();

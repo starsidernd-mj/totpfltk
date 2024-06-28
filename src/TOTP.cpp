@@ -41,17 +41,9 @@ std::string TOTP::base32_decode(const std::string& input) {
     std::string output;
     int buffer = 0, bits_left = 0;
 
-    // Base32 decoding table
-    const std::unordered_map<char, int> base32_map = {
-        {'A', 0}, {'B', 1}, {'C', 2}, {'D', 3}, {'E', 4}, {'F', 5}, {'G', 6}, {'H', 7},
-        {'I', 8}, {'J', 9}, {'K', 10}, {'L', 11}, {'M', 12}, {'N', 13}, {'O', 14}, {'P', 15},
-        {'Q', 16}, {'R', 17}, {'S', 18}, {'T', 19}, {'U', 20}, {'V', 21}, {'W', 22}, {'X', 23},
-        {'Y', 24}, {'Z', 25}, {'2', 26}, {'3', 27}, {'4', 28}, {'5', 29}, {'6', 30}, {'7', 31}
-    };
-
     for (char c : input) {
         if (base32_map.find(c) == base32_map.end()) {
-            throw std::invalid_argument("Invalid character in Base32 string");
+            continue;
         }
 
         buffer <<= 5;
