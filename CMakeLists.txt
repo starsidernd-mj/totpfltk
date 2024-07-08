@@ -23,10 +23,17 @@ set(SOURCES
     main.cpp
     # Add more source files here if needed
 )
+add_subdirectory(src)
+add_subdirectory(tests)
+
+if(WIN32)
+    set(CMAKE_C_COMPILER x86_64-w64-mingw32-gcc)
+    set(CMAKE_CXX_COMPILER x86_64-w64-mingw32-g++)
+endif()
 
 # Set compiler flags
 set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-unused-parameter -Wno-unused-function -Wno-comment")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-unused-parameter -Wno-unused-function -Wno-comment -Wno-reorder -Wno-sign-compare -Wno-address -Wno-unused-variable -Wno-dev")
 
 # Include source headers
 include_directories(${PROJECT_SOURCE_DIR}/include)
