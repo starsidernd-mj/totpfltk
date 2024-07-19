@@ -70,21 +70,5 @@ install(PROGRAMS totpfltk-pkexec DESTINATION /usr/local/bin)
 # Create /etc/totpfltk and create keys
 install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${TOTPFLTK_ETC_DIR})")
 install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E touch ${TOTPFLTK_ETC_DIR}/keys)")
+install(CODE "execute_process(COMMAND /bin/chmod 600 ${TOTPFLTK_ETC_DIR}/keys)")
 
-# Example of a post-install script
-install(CODE "
-message(STATUS \"Setting up keys in /etc/totpfltk\")
-execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory /etc/totpfltk)
-execute_process(COMMAND ${CMAKE_COMMAND} -E touch /etc/totpfltk/keys)
-")
-
-# To use sudo make install
-set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "default")
-install(CODE "
-if(NOT EXISTS /etc/totpfltk)
-    execute_process(COMMAND sudo ${CMAKE_COMMAND} -E make_directory /etc/totpfltk)
-endif()
-if(NOT EXISTS /etc/totpfltk/keys)
-    execute_process(COMMAND sudo ${CMAKE_COMMAND} -E touch /etc/totpfltk/keys)
-endif()
-")

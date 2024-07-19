@@ -10,7 +10,7 @@ class MyTest : public CppUnit::TestCase {
     CPPUNIT_TEST_SUITE_END();
 
 public:
-	//Using the site below for confirming RFC6238 since original whitepaper uses invalid characters in Secret key
+	//Using the site below for confirming RFC6238 since original whitepaper uses invalid non-base 32 characters in Secret key
 	//https://www.nayuki.io/page/time-based-one-time-password-tools
 	
 	std::string token = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
