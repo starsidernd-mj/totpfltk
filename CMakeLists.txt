@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.15)
 project(totpfltk)
 
 # Find OpenSSL
@@ -45,7 +45,7 @@ add_executable(totpfltk ${SOURCES})
 target_link_libraries(totpfltk fltk ${X11_LIBRARIES} OpenSSL::SSL OpenSSL::Crypto)
 
 # Installation paths
-set(CMAKE_INSTALL_PREFIX /usr/local)
+set(CMAKE_INSTALL_PREFIX /usr)
 set(TOTPFLTK_ETC_DIR /etc/totpfltk)
 
 # Install the binary
@@ -65,7 +65,7 @@ install(FILES totpfltk.desktop DESTINATION ${DESKTOP_DESTINATION})
 install(FILES org.pkexec.totpfltk.policy DESTINATION /usr/share/polkit-1/actions/)
 
 # Install pkexec script to run totpfltk as sudo
-install(PROGRAMS totpfltk-pkexec DESTINATION /usr/local/bin)
+install(PROGRAMS totpfltk-pkexec DESTINATION /usr/bin)
 
 # Create /etc/totpfltk and create keys
 install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${TOTPFLTK_ETC_DIR})")
