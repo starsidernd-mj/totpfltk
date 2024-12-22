@@ -20,6 +20,7 @@
 #include <FileHandler.h>
 #include <DeleteWindow.h>
 #include <ModifyWindow.h>
+#include <AES.h>
 
 #include <unistd.h>
 #include <fstream>
@@ -27,10 +28,12 @@
 #include <string>
 #include <cstdlib>
 #include <regex>
+#include <cstring>
 
 #include <openssl/evp.h>
 #include <openssl/aes.h>
 #include <openssl/rand.h>
+#include <openssl/err.h>
 
 bool DEBUG = false;
 
@@ -47,11 +50,12 @@ static TOTP* totpGen;
 std::vector<Entry_d> fileContents;
 
 bool visible = true;
-std::string saveFilePath = "/etc/totpfltk/keys";
+std::string saveFilePath = "/etc/totpfltk/test_keys";
 //std::string saveFilePath = "";
 // csv file format
 // issuer,secret,digits,timestep
 const int AES_KEY_LENGTH = 256;  // AES key size in bits (256-bit AES)
+AES *aes;
 
 void show_delete_window_callback(Fl_Widget* widget, void* data) {
     //std::cout << "Menu option selected: " << "Delete" << std::endl;
@@ -96,27 +100,22 @@ void exit_callback(Fl_Widget* widget, void* data) {
     exit(0);
 }
 
-void import_callback(Fl_Widget* widget, void* data) {
-    Fl_Button* button = (Fl_Button*)widget;
-
-}
-
 void show_popup(std::string title, std::string msg) {
     fl_message_title(title.c_str());
     fl_message(msg.c_str());
+    if(!DEBUG) std::cerr << msg.c_str() << std::endl;
 }
 
-bool aes_encrypt(const std::string &input_filename, const std::string &output_filename, const std::string &password) {
-    // encrypt data using AES
+bool aes_decrypt(const std::string &input_filename, const std::string &output_filename, const std::string &password) {
+    // AES decryption function
     // Set up key and IV
     unsigned char key[AES_KEY_LENGTH/8];
-    unsigned char iv[AES_BLOCK_SIZE];
+    unsigned char iv[AES_BLOCK_SIZE*2];
     memset(key, 0x00, AES_KEY_LENGTH/8);
-    memset(iv, 0x00, AES_BLOCK_SIZE);
+    memset(iv, 0x00, AES_BLOCK_SIZE*2);
 
     // Derive the key and IV from the password using a key derivation function
     if(!PKCS5_PBKDF2_HMAC_SHA1(password.c_str(), password.length(), NULL, 0, 10000, AES_KEY_LENGTH/8, key)) {
-        if(!DEBUG) std::cerr << "Key derivation failed" << std::endl;
         show_popup("Key fail", "Key derivation failed");
         return false;
     }
@@ -125,7 +124,77 @@ bool aes_encrypt(const std::string &input_filename, const std::string &output_fi
     std::ifstream ifs(input_filename, std::ios::binary);
     std::ofstream ofs(output_filename, std::ios::binary);
     if(!ifs.is_open() || !ofs.is_open()) {
-        if(!DEBUG) std::cerr << "File open failed" << std::endl;
+        show_popup("File failure", "File open failed");
+        return false;
+    }
+
+    // create decryption context
+    EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
+    if(!ctx) {
+        show_popup("Decryption failed", "Decryption context creation failed");
+        return false;
+    }
+
+    // initialize AES decryption (AES-256-CBC)
+    if(EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv) != 1) {
+        show_popup("AES failed", "AES decryption initialization failed");
+        EVP_CIPHER_CTX_free(ctx);
+        return false;
+    }
+
+    // decrypt the file
+    const size_t buffer_size = 1024;
+    unsigned char buffer[buffer_size];
+    unsigned char plain_buffer[buffer_size + AES_BLOCK_SIZE];
+    int plain_len = 0;
+
+    while(!ifs.eof()) {
+        ifs.read(reinterpret_cast<char *>(buffer), buffer_size);
+        int bytes_read = ifs.gcount();
+        std::cout << "Bytes read: " << bytes_read << std::endl;
+        if(EVP_DecryptUpdate(ctx, plain_buffer, &plain_len, buffer, bytes_read) != 1) {
+            show_popup("AES failed", "AES decryption finalization failed. Wrong password or corrupted file.");
+            EVP_CIPHER_CTX_free(ctx);
+            return false;
+        }
+        ofs.write(reinterpret_cast<char *>(plain_buffer), plain_len);
+    }
+
+    if(EVP_DecryptFinal_ex(ctx, plain_buffer, &plain_len) != 1) {
+        EVP_CIPHER_CTX_free(ctx);
+        //test
+        unsigned long err = ERR_get_error();
+        char err_msg[120];
+        ERR_error_string_n(err, err_msg, sizeof(err_msg));
+        std::cerr << "error: " << err_msg << std::endl;
+        //end test
+        show_popup("Decrypt failed", "Decryption finalization failed. Wrong password or corrupted file.");
+        return false;
+    }
+    ofs.write(reinterpret_cast<char *>(plain_buffer), plain_len);
+
+    EVP_CIPHER_CTX_free(ctx);
+    return true;
+}
+
+bool aes_encrypt(const std::string &input_filename, const std::string &output_filename, const std::string &password) {
+    // encrypt data using AES
+    // Set up key and IV
+    unsigned char key[AES_KEY_LENGTH/8];
+    unsigned char iv[AES_BLOCK_SIZE*2];
+    memset(key, 0x00, AES_KEY_LENGTH/8);
+    memset(iv, 0x00, AES_BLOCK_SIZE*2);
+
+    // Derive the key and IV from the password using a key derivation function
+    if(!PKCS5_PBKDF2_HMAC_SHA1(password.c_str(), password.length(), NULL, 0, 10000, AES_KEY_LENGTH/8, key)) {
+        show_popup("Key fail", "Key derivation failed");
+        return false;
+    }
+
+    // open input and output files
+    std::ifstream ifs(input_filename, std::ios::binary);
+    std::ofstream ofs(output_filename, std::ios::binary);
+    if(!ifs.is_open() || !ofs.is_open()) {
         show_popup("File failure", "File open failed");
         return false;
     }
@@ -133,14 +202,12 @@ bool aes_encrypt(const std::string &input_filename, const std::string &output_fi
     // create encryption context
     EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
     if(!ctx) {
-        if(!DEBUG) std::cerr << "Encryption context creation failed" << std::endl;
         show_popup("Encryption failed", "Encryption context creation failed");
         return false;
     }
 
     // initialize AES encryption
     if(EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv) != 1) {
-        if(!DEBUG) std::cerr << "AES encryption initialization failed" << std::endl;
         show_popup("AES failed", "AES encryption initialization failed");
         EVP_CIPHER_CTX_free(ctx);
         return false;
@@ -156,7 +223,6 @@ bool aes_encrypt(const std::string &input_filename, const std::string &output_fi
         ifs.read(reinterpret_cast<char *>(buffer), buffer_size);
         int bytes_read = ifs.gcount();
         if(EVP_EncryptUpdate(ctx, cipher_buffer, &cipher_len, buffer, bytes_read) != 1) {
-            if(!DEBUG) std::cerr << "AES encryption update failed" << std::endl;
             show_popup("AES update", "AES encryption update failed");
             EVP_CIPHER_CTX_free(ctx);
             return false;
@@ -165,7 +231,6 @@ bool aes_encrypt(const std::string &input_filename, const std::string &output_fi
     }
 
     if(EVP_EncryptFinal_ex(ctx, cipher_buffer, &cipher_len) != 1) {
-        if(!DEBUG) std::cerr << "AES encryption finalization failed" << std::endl;
         show_popup("AES final", "AES encryption finalization failed");
         EVP_CIPHER_CTX_free(ctx);
         return false;
@@ -196,6 +261,66 @@ bool is_password_strong(const std::string &password) {
         return false;
     }
     return true;
+}
+
+void import_callback(Fl_Widget* widget, void* data) {
+    Fl_Button* button = (Fl_Button*)widget;
+
+    // create a modal window for password input
+    Fl_Window *password_window = new Fl_Window(250, 150, "Enter password");
+
+    // input fields for password and confirmation
+    Fl_Input *password_input = new Fl_Input(100, 30, 120, 25, "Password:");
+    password_input->type(FL_SECRET_INPUT);
+
+    Fl_Input *confirm_input = new Fl_Input(100, 70, 120, 25, "Confirm:");
+    confirm_input->type(FL_SECRET_INPUT);
+
+    // button to submit the password
+    Fl_Button *submit_button = new Fl_Button(80, 110, 90, 30, "Submit");
+
+    // callback for when the user submits the password
+    submit_button->callback([](Fl_Widget *w, void *data) {
+        Fl_Input *password_input = (Fl_Input *)data;
+        Fl_Input *confirm_input = (Fl_Input *)w->parent()->child(1);
+
+        const std::string password = password_input->value();
+        const std::string confirm_password = confirm_input->value();
+
+        // check if both passwords match
+        if(password == confirm_password && !password.empty()) {
+            // check if the password is strong enough
+            if(!is_password_strong(password)) {
+                fl_alert("Password must be between 8 and 32 characters (lower and uppercase), digits and symbols");
+                return;
+            }
+            // open file chooser to select the output file
+            const char *import_filename = fl_file_chooser("Select input file", "*", "encrypted.dat");
+            const char *test_filename = fl_file_chooser("Select test file", "*", "encrypted.dat");
+
+            // check if the user selected a file
+            if(import_filename && test_filename) {
+                // passwords match; now encrypt
+                //if(aes_decrypt(import_filename, test_filename, password)) {
+                if(aes->aes_decrypt(import_filename, test_filename, password)) {
+                    show_popup("File decryption", "File decrypted successfully");
+                } else {
+                    show_popup("File decryption", "File decryption failed");
+                }
+                w->parent()->hide();
+            } else {
+                // user canceled file selection
+                fl_alert("No output file selected");
+            }
+        } else {
+            // passwords dont match; show error
+            fl_alert("Passwords do not match or are empty, try again");
+        }
+    }, (void *)password_input);
+
+    password_window->end();
+    password_window->set_modal();
+    password_window->show();
 }
 
 void export_callback(Fl_Widget* widget, void* data) {
@@ -230,16 +355,18 @@ void export_callback(Fl_Widget* widget, void* data) {
                 return;
             }
             // open file chooser to select the output file
-            const char *output_filename = fl_file_chooser("Select output file", "*", "encrypted.dat");
+            const char* test_filename = fl_file_chooser("Select test file", "*", "", 0);
+            const char* output_filename = fl_file_chooser("Select output file", "*.aes", "", 0);
 
             // check if the user selected a file
-            if(output_filename) {
+            if(output_filename != NULL && test_filename != NULL) {
+                std::cout << "Test filename: " << test_filename << std::endl;
+                std::cout << "Out filename: " << output_filename << std::endl;
                 // passwords match; now encrypt
-                if(aes_encrypt(saveFilePath, output_filename, password)) {
-                    if(!DEBUG) std::cout << "File encrypted successfully" << std::endl;
+                //if(aes_encrypt(test_filename, output_filename, password)) {
+                if(aes->aes_encrypt(test_filename, output_filename, password)) {
                     show_popup("File encryption", "File encrypted successfully");
                 } else {
-                    if(!DEBUG) std::cout << "File encryption failed" << std::endl;
                     show_popup("File encryption", "File encryption failed");
                 }
                 w->parent()->hide();
@@ -315,12 +442,14 @@ void relaunch_with_sudo(int argc, char* argv[]) {
 
 int main(int argc, char **argv) {
     // Check user permissions
-    if(geteuid() != 0) {
+    /*if(geteuid() != 0) {
         fl_message_title("Permission Denied");
         fl_message("This application must be run as root (sudo).");
         relaunch_with_sudo(argc, argv);
-    }
+    }*/
 
+    aes = new AES();
+    aes->aes_init();
     // get home directory
     /*saveFilePath = getenv("HOME");
     std::cout << saveFilePath << std::endl;
@@ -392,8 +521,6 @@ int main(int argc, char **argv) {
     exportButton->type(FL_NORMAL_BUTTON);
     exportButton->tooltip("Export keys");
     exportButton->callback(export_callback);
-
-
 
     // Attempt to read the file
     try {
